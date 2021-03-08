@@ -175,15 +175,21 @@ public class SwiftFlutterMongoStitchPlugin: NSObject, FlutterPlugin {
         let mongoClientRLM = app.currentUser?.mongoClient("mongodb-atlas")
         
         // todo: remove when removing StitchSDK dependency
-        let stitchAppClient = try! Stitch.initializeDefaultAppClient(withClientAppID: clientAppId!)
-        
-        // todo: remove when removing StitchSDK dependency
-        let mongoClient = try? stitchAppClient.serviceClient(
-            fromFactory: remoteMongoClientFactory, withName: "mongodb-atlas"
-        )
-                
-        self.client = MyMongoStitchClient(client: mongoClient!, appClient: stitchAppClient, app: app)
-        result(true)
+        do {
+            let stitchAppClient = try Stitch.initializeDefaultAppClient(withClientAppID: clientAppId!)
+            // todo: remove when removing StitchSDK dependency
+            let mongoClient = try? stitchAppClient.serviceClient(
+                fromFactory: remoteMongoClientFactory, withName: "mongodb-atlas"
+            )
+                    
+            self.client = MyMongoStitchClient(client: mongoClient!, appClient: stitchAppClient, app: app)
+            result(true)
+        } catch let error {
+            result(FlutterError(code: "ERROR",
+                                message: "RealmApp already initialized",
+                                details: nil))
+        }
+       
     }
     
     func signInAnonymously(_ result: @escaping FlutterResult){
